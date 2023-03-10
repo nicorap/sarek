@@ -1,0 +1,3 @@
+patient,sex,status,sample,lane,fastq_1,fastq_2
+HCC1395,XX,0,HCC1395N,1,s3://sra-pub-src-3/SRR7890919/WES_EA_N_1_ATTGGCTC_L001_R1_001.fastq.gz,s3://sra-pub-src-3/SRR7890919/WES_EA_N_1_ATTGGCTC_L001_R2_001.fastq.gz
+HCC1395,XX,1,HCC1395T,1,s3://sra-pub-src-3/SRR7890918/WES_EA_T_1_GACTAGTA_L001_R1_001.fastq.gz,s3://sra-pub-src-3/SRR7890918/WES_EA_T_1_GACTAGTA_L001_R2_001.fastq.gz
