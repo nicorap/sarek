@@ -1,0 +1,94 @@
+name: full-sized tests on cloud providers
+run-name: Submitting workflow to all cloud providers using full sized data
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform to run test"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - aws
+          - azure
+          - gcp
+jobs:
+  run-full-tests-on-aws:
+    if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'aws' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile: ["test_full", "test_full_germline"]
+    steps:
+      - uses: seqeralabs/action-tower-launch@v1
+        with:
+          workspace_id: ${{ secrets.TOWER_WORKSPACE_ID }}
+          access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
+          compute_env: ${{ secrets.TOWER_CE_AWS_CPU }}
+          workdir: "${{ secrets.TOWER_BUCKET_AWS }}/work/${{ github.event.repository.name }}/work-${{ github.sha }}"
+          run_name: "aws_${{ github.event.repository.name }}_${{ matrix.profile }}"
+          profiles: ${{ matrix.profile }},aws_tower
+          parameters: |
+            {
+                "hook_url": "${{ secrets.MEGATESTS_ALERTS_SLACK_HOOK_URL }}",
+                "outdir": "${{ secrets.TOWER_BUCKET_AWS }}/${{ github.event.repository.name }}/results-${{ github.sha }}/${{ matrix.profile }}"
+            }
+          wait: false
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Tower debug log file
+          path: tower_action_*.log
+
+  run-full-tests-on-gcp:
+    if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'gcp' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile: ["test_full_gcp", "test_full_germline_gcp"]
+    steps:
+      - uses: seqeralabs/action-tower-launch@v1
+        with:
+          workspace_id: ${{ secrets.TOWER_WORKSPACE_ID }}
+          access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
+          compute_env: ${{ secrets.TOWER_CE_GCP_CPU }}
+          workdir: "${{ secrets.TOWER_BUCKET_GCP }}/work/${{ github.event.repository.name }}/work-${{ github.sha }}"
+          run_name: "gcp_${{ github.event.repository.name }}_${{ matrix.profile }}"
+          profiles: ${{ matrix.profile }},gcp_tower
+          parameters: |
+            {
+                "hook_url": "${{ secrets.MEGATESTS_ALERTS_SLACK_HOOK_URL }}",
+                "outdir": "${{ secrets.TOWER_BUCKET_GCP }}/${{ github.event.repository.name }}/results-${{ github.sha }}/${{ matrix.profile }}"
+            }
+          wait: false
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Tower debug log file
+          path: tower_action_*.log
+
+  run-full-tests-on-azure:
+    if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'azure' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile: ["test_full_azure", "test_full_germline_azure"]
+    steps:
+      - uses: seqeralabs/action-tower-launch@v1
+        with:
+          workspace_id: ${{ secrets.TOWER_WORKSPACE_ID }}
+          access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
+          compute_env: ${{ secrets.TOWER_CE_AZURE_CPU }}
+          workdir: "${{ secrets.TOWER_BUCKET_AZURE }}/work/${{ github.event.repository.name }}/work-${{ github.sha }}"
+          run_name: "azure_${{ github.event.repository.name }}_${{ matrix.profile }}"
+          profiles: ${{ matrix.profile }},azure_tower
+          parameters: |
+            {
+                "hook_url": "${{ secrets.MEGATESTS_ALERTS_SLACK_HOOK_URL }}",
+                "outdir": "${{ secrets.TOWER_BUCKET_AZURE }}/${{ github.event.repository.name }}/results-${{ github.sha }}/${{ matrix.profile }}",
+                "igenomes_base": "${{ secrets.TOWER_IGENOMES_BASE_AZURE }}"
+            }
+          wait: false
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Tower debug log file
+          path: tower_action_*.log
